@@ -1,0 +1,98 @@
+# Alpaca Proxy configuration.
+# Copy to config.yaml next to the service and edit. All values below are the
+# defaults except where noted; every setting may be omitted apart from
+# upstream_base_url and the two devices.upstream_device_number entries.
+
+# ---------------------------------------------------------------------------
+# Upstream (the real Alpaca API)
+# ---------------------------------------------------------------------------
+
+# Base URL of the upstream Alpaca API. Must be http:// or https://.
+# A trailing slash is stripped. The value below is only a placeholder: replace
+# it with the observatory's Alpaca API base URL. Required.
+upstream_base_url: https://alpaca-api.example.com
+
+# ClientID sent on every upstream request. Any positive integer; it only
+# identifies this proxy in upstream logs.
+client_id: 1
+
+# Per-request timeout, in seconds, for upstream calls. A timeout counts as a
+# failed poll.
+request_timeout_seconds: 10
+
+# ---------------------------------------------------------------------------
+# Polling and failure handling
+# ---------------------------------------------------------------------------
+
+# How often to poll upstream, in seconds. NINA is always served from cache,
+# so this is the freshness of the data it sees.
+poll_interval_seconds: 10
+
+# Consecutive failed polls before a device is considered down. At this count
+# the safety monitor starts reporting IsSafe = false. Not latching: the first
+# successful poll clears it. Must be >= 1.
+failure_threshold: 5
+
+# When true, the weather station being down past failure_threshold also forces
+# IsSafe = false -- both devices sit behind the same upstream host, so a
+# weather-only failure usually means the host is unreachable. Set false to
+# decouple them.
+unsafe_on_weather_failure: true
+
+# ---------------------------------------------------------------------------
+# Local HTTP server (what NINA connects to)
+# ---------------------------------------------------------------------------
+
+# Address to bind. 127.0.0.1 keeps the proxy private to this machine; use
+# 0.0.0.0 only if another machine on the LAN needs it.
+host: 127.0.0.1
+
+# Port to bind. Enter this port in NINA's Alpaca device setup (with
+# rediscovery unchecked -- the proxy has no UDP discovery responder).
+port: 11111
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+# DEBUG, INFO, WARNING, ERROR or CRITICAL.
+log_level: INFO
+
+# Path to a log file. null (or omitted) logs to the console only.
+log_file: null
+
+# ---------------------------------------------------------------------------
+# Devices
+# ---------------------------------------------------------------------------
+# Each device is proxied one-to-one: the proxy reads upstream_device_number
+# upstream and exposes it locally as local_device_number. Both are exposed as
+# device 0 here because each device type has exactly one device locally.
+
+devices:
+
+  safety:
+    # Alpaca device type: safetymonitor or observingconditions.
+    device_type: safetymonitor
+
+    # Device number on the UPSTREAM API. This is your BUILDING NUMBER, taken
+    # from the observatory's ASCOM Alpaca guide -- the building you rent is
+    # that safetymonitor device number. The 0 below is only a placeholder:
+    # replace it with your own building number. Required.
+    upstream_device_number: 0
+
+    # Device number this proxy exposes to NINA. Enter this in NINA.
+    local_device_number: 0
+
+    # Name reported to NINA and used in log messages.
+    name: Safety Monitor
+
+  weather:
+    device_type: observingconditions
+
+    # The weather station is usually upstream device 1. Required.
+    upstream_device_number: 1
+
+    # Device number this proxy exposes to NINA. Enter this in NINA.
+    local_device_number: 0
+
+    name: Weather Station

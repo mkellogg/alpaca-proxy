@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alpaca-proxy"
+version = "0.1.0"
+description = "Caching ASCOM Alpaca proxy for a remote safety monitor and weather station"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[project.scripts]
+alpaca-proxy = "alpaca_proxy.__main__:main"
+
+[tool.setuptools]
+packages = ["alpaca_proxy"]
